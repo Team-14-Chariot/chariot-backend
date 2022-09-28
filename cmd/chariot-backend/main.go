@@ -1,9 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"log"
+
+	"github.com/Team-14-Chariot/chariot-backend/routes"
+	"github.com/pocketbase/pocketbase"
 )
 
 func main() {
-	fmt.Println("Hello world!")
+	app := pocketbase.New()
+
+	routes.Routes(app)
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }
