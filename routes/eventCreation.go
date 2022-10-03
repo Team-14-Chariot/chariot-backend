@@ -1,16 +1,16 @@
 package routes
 
 import (
-	//"fmt"
 	//"net/http"
+	"fmt"
 	"math/rand"
 	//"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
+	//"github.com/pocketbase/pocketbase"
 	//"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func addEventCode(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func addEventCode(e *core.RecordCreateEvent) error {
 	// generate the id for the event
 	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	id := ""
@@ -20,6 +20,11 @@ func addEventCode(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 		c := alphabet[rand.Intn(len(alphabet))]
 		id += string(c)
 	}
+
+	fmt.Println(id)
+
+	// get the record being inserted into the table
+	e.Record.SetDataValue("event_id", id)
 
 	return nil
 }
