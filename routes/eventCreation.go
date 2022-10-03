@@ -23,8 +23,10 @@ func addEventCode(e *core.RecordCreateEvent) error {
 
 	fmt.Println(id)
 
-	// get the record being inserted into the table
-	e.Record.SetDataValue("event_id", id)
+	// if the record is being inserted into the events table, change the id field
+	if e.Record.TableName() == "events" {
+		e.Record.SetDataValue("event_id", id)
+	}
 
 	return nil
 }
