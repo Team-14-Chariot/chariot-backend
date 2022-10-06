@@ -8,4 +8,4 @@ services:
         - "5000:5000"
     volumes:
         - ./data:/data
-    command: "osrm-extract -p /opt/car.lua /data/indiana-latest.osm.pbf"
+    command: "osrm-routed --algorithm mld /data/indiana-latest.osrm"
