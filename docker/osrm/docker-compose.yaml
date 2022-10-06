@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  osrm:
+    container_name: osrm
+    image: osrm/osrm-backend:latest
+    restart: unless-stopped
+    ports:
+        - "5000:5000"
+    volumes:
+        - ./data:/data
+    command: "osrm-extract -p /opt/car.lua /data/indiana-latest.osm.pbf"
