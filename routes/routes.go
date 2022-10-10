@@ -7,6 +7,10 @@ import (
 
 func Routes(app *pocketbase.PocketBase) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return test_organizers(e, app)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return test(e, app)
 	})
 
@@ -17,4 +21,5 @@ func Routes(app *pocketbase.PocketBase) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return endEvent(e, app)
 	})
+
 }
