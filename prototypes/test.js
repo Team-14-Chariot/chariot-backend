@@ -21,11 +21,11 @@ ie. look below at how data is formatted
 */
 
 // create new pocketbase server
-const client = new Pocketbase('http://127.0.01.8090')
+const client = new Pocketbase('http://127.0.01.8090');
 
 // create record entry to insert into organizers table
-data = {username: "testuser@gmail.com", password: ""}
+data = {username: "testuser@gmail.com", password: ""};
 
 // submit request to insert data into table
 // check if it worked by looking at admin UI dashboard
-const record = await client.records.create('organizers', data)
+const record = await client.records.create('organizers', data);
