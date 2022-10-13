@@ -42,7 +42,7 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 				app.Dao().SaveRecord(newDriver)
 
-				return c.JSON(200, newDriver.Id)
+				return c.JSON(200, map[string]interface{}{"driver_id": newDriver.Id})
 			}
 
 			return c.NoContent(400)
