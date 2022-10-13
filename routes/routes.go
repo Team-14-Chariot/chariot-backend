@@ -42,4 +42,7 @@ func Routes(app *pocketbase.PocketBase) {
 		return getRide(e, app)
 	})
 
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return endRide(e, app)
+	})
 }
