@@ -44,7 +44,7 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 				return c.JSON(200, newDriver.Id)
 			}
 
-			return c.NoContent(401)
+			return c.NoContent(400)
 		},
 		Middlewares: []echo.MiddlewareFunc{
 			apis.RequireGuestOnly(),

@@ -22,6 +22,10 @@ func Routes(app *pocketbase.PocketBase) {
 		return joinEvent(e, app)
 	})
 
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return leaveEvent(e, app)
+	})
+
 	app.OnRecordBeforeCreateRequest().Add(func(e *core.RecordCreateEvent) error {
 		return (addEventCode(e))
 	})
