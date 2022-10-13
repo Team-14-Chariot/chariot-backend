@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -24,6 +26,13 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 		Path:   "/api/joinEvent",
 		Handler: func(c echo.Context) error {
 			var body joinEventBody
+
+			// Remove later, debug info
+			json_map := make(map[string]interface{})
+			json.NewDecoder(c.Request().Body).Decode(&json_map)
+			fmt.Print("New Request: ")
+			fmt.Println(json_map)
+
 			c.Bind(&body)
 
 			drivers, _ := app.Dao().FindCollectionByNameOrId("drivers")
