@@ -9,6 +9,7 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/models"
 )
 
 type requestRideBody struct {
@@ -17,6 +18,7 @@ type requestRideBody struct {
 	OriginLong string `json:"origin_longitude"`
 	DestLat    string `json:"dest_latitude"`
 	DestLong   string `json:"dest_longitude"`
+	RiderName  string `json:"rider_name"`
 	GroupSize  int    `json:"group_size"`
 }
 
@@ -29,22 +31,32 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			c.Bind(&body)
 
 			drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
-			drivers := helpers.GetAllRecords(app, drivers_col)
+			drivers := helpers.GetEventDrivers(app, drivers_col, body.EventID)
 
 			if len(drivers) > 0 {
-				// 	rides, _ := app.Dao().FindCollectionByNameOrId("rides")
+				rides, _ := app.Dao().FindCollectionByNameOrId("rides")
 
-				// 	events, _ := app.Dao().FindCollectionByNameOrId("events")
-				// 	event, _ := app.Dao().FindFirstRecordByData(events, "event_id", body.EventID)
+				events, _ := app.Dao().FindCollectionByNameOrId("events")
+				event, _ := app.Dao().FindFirstRecordByData(events, "event_id", body.EventID)
 
-				// 	if (event != nil) && (event.GetDataValue("accept_rides") == true) {
-				// 		newRide := models.NewRecord(rides)
+				if event.GetDataValue("accept_rides") == true {
+					newRide := models.NewRecord(rides)
 
-				// 		app.Dao().SaveRecord(newRide)
+					newRide.SetDataValue("event_id", body.EventID)
+					newRide.SetDataValue("origin_latitude", body.OriginLat)
+					newRide.SetDataValue("origin_longitude", body.OriginLong)
+					newRide.SetDataValue("dest_latitude", body.DestLat)
+					newRide.SetDataValue("dest_longitude", body.DestLong)
+					newRide.SetDataValue("rider_name", body.RiderName)
+					newRide.SetDataValue("needs_ride", true)
+					newRide.SetDataValue("in_ride", false)
+					newRide.SetDataValue("group_size", body.GroupSize)
 
-				// 		return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
-				// 	}
-				return c.NoContent(200)
+					app.Dao().SaveRecord(newRide)
+					return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
+				}
+
+				return c.NoContent(512)
 			}
 
 			return c.NoContent(400)
