@@ -31,9 +31,7 @@ func updateDriverStatus(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			if ride != nil {
 				// Update the ride with the new information
-				if body.Eta != 0 {
-					ride.SetDataValue("eta", body.Eta)
-				}
+				ride.SetDataValue("eta", body.Eta)
 				ride.SetDataValue("current_latitude", body.DriverLat)
 				ride.SetDataValue("current_longitude", body.DriverLong)
 				app.Dao().SaveRecord(ride)
