@@ -34,6 +34,10 @@ func Routes(app *pocketbase.PocketBase) {
 		return resumeDriver(e, app)
 	})
 
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return updateDriverStatus(e, app)
+	})
+
 	app.OnRecordBeforeCreateRequest().Add(func(e *core.RecordCreateEvent) error {
 		return (addEventCode(e))
 	})
