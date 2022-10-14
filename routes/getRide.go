@@ -30,7 +30,7 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			if driver != nil {
 				rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
-				rides := helpers.GetNeededRides(app, rides_col, driver.GetDataValue("event_code").(string))
+				rides := helpers.GetNeededRides(app, rides_col, driver.GetDataValue("event_id").(string))
 
 				if len(rides) > 0 {
 					ride := rides[0]
