@@ -28,12 +28,22 @@ func updateDriverStatus(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			rides, _ := app.Dao().FindCollectionByNameOrId("rides")
 			ride, _ := app.Dao().FindFirstRecordByData(rides, "id", body.RideID)
+			drivers, _ := app.Dao().FindCollectionByNameOrId("drivers")
+			driver, _ := app.Dao().FindFirstRecordByData(drivers, "id", body.DriverID)
+
+			if driver != nil {
+				driver.SetDataValue("current_latitude", body.DriverLat)
+				driver.SetDataValue("current_longitude", body.DriverLong)
+
+				app.Dao().SaveRecord(driver)
+				if ride == nil {
+					return c.NoContent(200)
+				}
+			}
 
 			if ride != nil {
 				// Update the ride with the new information
 				ride.SetDataValue("eta", body.Eta)
-				ride.SetDataValue("current_latitude", body.DriverLat)
-				ride.SetDataValue("current_longitude", body.DriverLong)
 				app.Dao().SaveRecord(ride)
 
 				return c.NoContent(200)

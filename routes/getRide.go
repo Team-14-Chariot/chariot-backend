@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
+	//"github.com/Team-14-Chariot/chariot-backend/tools"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -31,12 +32,15 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			if driver != nil {
 				rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
 				rides := helpers.GetNeededRides(app, rides_col, driver.GetDataValue("event_id").(string))
+				//drivers := helpers.GetEventDrivers(app, drivers_col, driver.GetDataValue("event_id").(string))
 
 				if len(rides) > 0 {
+					//tools.CalculateTimeMatrix(rides, drivers)
 					ride := rides[0]
 
 					ride.SetDataValue("needs_ride", false)
 					ride.SetDataValue("in_ride", true)
+					ride.SetDataValue("driver_id", body.DriverID)
 					app.Dao().SaveRecord(&ride)
 
 					return c.JSON(200, map[string]interface{}{
