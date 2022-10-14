@@ -10,7 +10,7 @@ func GetEventDrivers(app *pocketbase.PocketBase, drivers_col *models.Collection,
 
 	n := 0
 	for _, driver := range drivers {
-		if driver.GetDataValue("event_id") == event_id {
+		if (driver.GetDataValue("event_id") == event_id) && (driver.GetDataValue("active") == true) {
 			drivers[n] = driver
 			n++
 		}

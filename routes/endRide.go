@@ -23,7 +23,7 @@ func endRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			rides, _ := app.Dao().FindCollectionByNameOrId("rides")
 			ride, _ := app.Dao().FindFirstRecordByData(rides, "id", body.RideID)
-			ride.SetDataValue("active", false)
+			ride.SetDataValue("in_ride", false)
 
 			app.Dao().SaveRecord(ride)
 			return c.NoContent(200)

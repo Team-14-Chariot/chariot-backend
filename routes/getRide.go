@@ -25,15 +25,19 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			c.Bind(&body)
 
-			drivers, _ := app.Dao().FindCollectionByNameOrId("drivers")
-			driver, _ := app.Dao().FindFirstRecordByData(drivers, "id", body.DriverID)
+			drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
+			driver, _ := app.Dao().FindFirstRecordByData(drivers_col, "id", body.DriverID)
 
 			if driver != nil {
 				rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
-				rides := helpers.GetAllRecords(app, rides_col)
+				rides := helpers.GetNeededRides(app, rides_col, driver.GetDataValue("event_code").(string))
 
 				if len(rides) > 0 {
 					ride := rides[0]
+
+					ride.SetDataValue("needs_ride", false)
+					ride.SetDataValue("in_ride", true)
+					app.Dao().SaveRecord(&ride)
 
 					return c.JSON(200, map[string]interface{}{
 						"ride_id":          ride.Id,
@@ -43,6 +47,8 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 						"dest_longitude":   ride.GetDataValue("dest_longitude"),
 						"rider_name":       "Jeff",
 					})
+				} else {
+					return c.NoContent(201)
 				}
 			}
 
