@@ -49,4 +49,8 @@ func Routes(app *pocketbase.PocketBase) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return getEta(e, app)
 	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return validateEvent(e, app)
+	})
 }
