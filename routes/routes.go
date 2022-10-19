@@ -53,4 +53,8 @@ func Routes(app *pocketbase.PocketBase) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return validateEvent(e, app)
 	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return dropoffEarly(e, app)
+	})
 }
