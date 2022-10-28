@@ -21,19 +21,10 @@ func getEta(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			var body getEtaBody
 			c.Bind(&body)
 
-			rides, _ := app.Dao().FindCollectionByNameOrId("rides")
-			ride, _ := app.Dao().FindFirstRecordByData(rides, "id", body.RideID)
+		}
+})
 
-			if ride != nil {
-				return c.JSON(200, map[string]interface{}{"eta": ride.GetDataValue("eta")})
-			}
-
-			return c.NoContent(400)
-		},
-		Middlewares: []echo.MiddlewareFunc{
-			apis.RequireGuestOnly(),
-		},
-	})
+	
 
 	return nil
 }
