@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
@@ -18,7 +17,7 @@ type joinEventBody struct {
 	CarPlate       string `json:"car_licence_plate"`
 }
 
-func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func joinEvent(e *core.ServeEvent, app core.App) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/joinEvent",

@@ -6,7 +6,6 @@ import (
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
@@ -22,7 +21,7 @@ type requestRideBody struct {
 	GroupSize  int    `json:"group_size"`
 }
 
-func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func requestRide(e *core.ServeEvent, app core.App) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/requestRide",

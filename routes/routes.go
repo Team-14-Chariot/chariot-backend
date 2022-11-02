@@ -1,11 +1,10 @@
 package routes
 
 import (
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func Routes(app *pocketbase.PocketBase) {
+func Routes(app core.App) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return requestRide(e, app)
 	})

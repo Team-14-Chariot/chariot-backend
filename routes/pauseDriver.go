@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -13,7 +12,7 @@ type pauseDriveBody struct {
 	DriverID string `json:"driver_id"`
 }
 
-func pauseDriver(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func pauseDriver(e *core.ServeEvent, app core.App) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/pauseDriver",

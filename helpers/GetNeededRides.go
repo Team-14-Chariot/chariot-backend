@@ -1,11 +1,11 @@
 package helpers
 
 import (
-	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func GetNeededRides(app *pocketbase.PocketBase, rides_col *models.Collection, event_id string) []models.Record {
+func GetNeededRides(app core.App, rides_col *models.Collection, event_id string) []models.Record {
 	rides := GetAllRecords(app, rides_col)
 
 	n := 0

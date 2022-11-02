@@ -6,7 +6,6 @@ import (
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	"github.com/Team-14-Chariot/chariot-backend/tools"
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/models"
@@ -18,7 +17,7 @@ type getRideBody struct {
 	CurrentLong string `json:"current_longitude"`
 }
 
-func getRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func getRide(e *core.ServeEvent, app core.App) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/getRide",
