@@ -15,7 +15,7 @@ type joinEventBody struct {
 	Name           string `json:"name"`
 	CarCapacity    int    `json:"car_capacity"`
 	CarDescription string `json:"car_description"`
-	CarPlate       string `json:"car_licence_plate"`
+	CarPlate       string `json:"car_license_plate"`
 }
 
 func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
