@@ -20,6 +20,7 @@ type requestRideBody struct {
 	DestLong   string `json:"dest_longitude"`
 	RiderName  string `json:"rider_name"`
 	GroupSize  int    `json:"group_size"`
+	Ride_id    string `json:"ride_id"`
 }
 
 func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
@@ -35,24 +36,22 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 			if len(drivers) > 0 {
 				rides, _ := app.Dao().FindCollectionByNameOrId("rides")
-				rider, _ := app.Dao().FindFirstRecordByData(rides, "rider_name", body.RiderName)
+				rider, _ := app.Dao().FindFirstRecordByData(rides, "ride_id", body.Ride_id)
 
 				events, _ := app.Dao().FindCollectionByNameOrId("events")
 				event, _ := app.Dao().FindFirstRecordByData(events, "event_id", body.EventID)
 
 				if event.GetDataValue("accept_rides") == true {
-					if rider.GetDataValue("rider_name") == body.RiderName {
-						if rider.GetDataValue("in_ride") == false {
-						newRide := models.NewRecord(rides)
+					if rider.GetDataValue("ride_id") == body.ride_id {
+						if rider.GetDataValue("in_ride") == false && rider.needs_ride == true {
+							newRide := models.NewRecord(rides)
 
-							newRide.SetDataValue("event_id", body.EventID)
+							
 							newRide.SetDataValue("origin_latitude", body.OriginLat)
 							newRide.SetDataValue("origin_longitude", body.OriginLong)
 							newRide.SetDataValue("dest_latitude", body.DestLat)
 							newRide.SetDataValue("dest_longitude", body.DestLong)
-							newRide.SetDataValue("rider_name", body.RiderName)
-							newRide.SetDataValue("needs_ride", true)
-							newRide.SetDataValue("in_ride", false)
+						
 							newRide.SetDataValue("group_size", body.GroupSize)
 
 							app.Dao().SaveRecord(newRide)
