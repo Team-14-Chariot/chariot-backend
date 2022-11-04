@@ -8,7 +8,7 @@ type Ride struct {
 	OriginLong string
 	DestLat    string
 	DestLong   string
-	RideLength int
+	RideLength float64
 	InRide     bool `json:"inRide"`
 	Edges      []Edge
 }

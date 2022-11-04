@@ -34,7 +34,7 @@ func ConvertToRideObject(rides []models.Record) []Ride {
 			OriginLong: ride.GetStringDataValue("origin_longitude"),
 			DestLat:    ride.GetStringDataValue("dest_latitude"),
 			DestLong:   ride.GetStringDataValue("dest_longitude"),
-			RideLength: ride.GetIntDataValue("ride_length"),
+			RideLength: ride.GetFloatDataValue("ride_length"),
 			InRide:     ride.GetBoolDataValue("in_ride")})
 	}
 
