@@ -39,6 +39,7 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 				newDriver.SetDataValue("car_licence_plate", body.CarPlate)
 				newDriver.SetDataValue("event_id", body.EventCode)
 				newDriver.SetDataValue("active", true)
+				newDriver.SetDataValue("in_ride", false)
 
 				app.Dao().SaveRecord(newDriver)
 

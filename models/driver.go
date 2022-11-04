@@ -5,4 +5,5 @@ type Driver struct {
 	Capacity    int
 	CurrentLat  string
 	CurrentLong string
+	Edges       []Edge
 }

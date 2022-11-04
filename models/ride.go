@@ -10,4 +10,5 @@ type Ride struct {
 	DestLong   string
 	RideLength int
 	InRide     bool `json:"inRide"`
+	Edges      []Edge
 }

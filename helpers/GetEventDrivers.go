@@ -22,16 +22,33 @@ func GetEventDrivers(app *pocketbase.PocketBase, drivers_col *models.Collection,
 	return drivers
 }
 
-func ConvertToDriverObject(drivers []models.Record) []Driver {
+func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) []Driver {
 	var driverObjects []Driver
 
 	for _, driver := range drivers {
-		driverObjects = append(driverObjects, Driver{
-			ID:          driver.Id,
-			Capacity:    driver.GetIntDataValue("car_capacity"),
-			CurrentLat:  driver.GetStringDataValue("current_latitude"),
-			CurrentLong: driver.GetStringDataValue("current_longitude"),
-		})
+		if driver.GetBoolDataValue("in_ride") {
+			rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
+			rides := GetNeededRides(app, rides_col, driver.GetStringDataValue("event_id"))
+
+			for _, ride := range rides {
+				if ride.GetDataValue("driver_id") == driver.Id {
+					driverObjects = append(driverObjects, Driver{
+						ID:          driver.Id,
+						Capacity:    driver.GetIntDataValue("car_capacity"),
+						CurrentLat:  ride.GetStringDataValue("dest_latitude"),
+						CurrentLong: ride.GetStringDataValue("dest_longitude"),
+					})
+					break
+				}
+			}
+		} else {
+			driverObjects = append(driverObjects, Driver{
+				ID:          driver.Id,
+				Capacity:    driver.GetIntDataValue("car_capacity"),
+				CurrentLat:  driver.GetStringDataValue("current_latitude"),
+				CurrentLong: driver.GetStringDataValue("current_longitude"),
+			})
+		}
 	}
 
 	return driverObjects
