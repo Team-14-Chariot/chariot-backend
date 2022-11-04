@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	. "github.com/Team-14-Chariot/chariot-backend/helpers"
@@ -45,6 +46,8 @@ func getRideQueues(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[st
 					rides, valid := queues[driver.Id]
 					if valid {
 						resp.Queues = append(resp.Queues, queueResp{DriverName: driver.GetStringDataValue("name"), Rides: rides.GetRides()})
+						fmt.Printf("Driver %s Rides: ", driver.GetStringDataValue("name"))
+						fmt.Println(rides.GetRides())
 					} else {
 						resp.Queues = append(resp.Queues, queueResp{DriverName: driver.GetStringDataValue("name"), Rides: []Ride{}})
 					}
