@@ -47,6 +47,8 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 		if startingNode.GetLastRide() == nil { // Driver has no rides yet
 			fmt.Println("No Rides Yet")
 			edgeIndex, newEdge := getLowestDriverEdge(drivers[i])
+			fmt.Printf("Driver Lowest Edge: ")
+			fmt.Println(newEdge)
 			if edgeIndex != -1 {
 				newRideIndex, newRide := findRide(rides, newEdge.ID)
 				if isAssigned(assigned, newEdge.ID) {
@@ -75,6 +77,8 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 		} else {
 			fmt.Println("Other Rides Already")
 			edgeIndex, newEdge := getLowestRideEdge(*startingNode.GetLastRide())
+			fmt.Printf("Ride Lowest Edge: ")
+			fmt.Println(newEdge)
 			if edgeIndex != -1 {
 				newRideIndex, newRide := findRide(rides, newEdge.ID)
 				if isAssigned(assigned, newEdge.ID) {
