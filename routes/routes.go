@@ -1,13 +1,14 @@
 package routes
 
 import (
+	. "github.com/Team-14-Chariot/chariot-backend/models"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func Routes(app *pocketbase.PocketBase) {
+func Routes(app *pocketbase.PocketBase, queues map[string]DriverQueue) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return requestRide(e, app)
+		return requestRide(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -60,5 +61,13 @@ func Routes(app *pocketbase.PocketBase) {
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return pickupEarly(e, app)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return getRideQueues(e, app, queues)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return test(e, app, queues)
 	})
 }

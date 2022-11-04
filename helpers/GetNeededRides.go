@@ -27,12 +27,14 @@ func ConvertToRideObject(rides []models.Record) []Ride {
 
 	for _, ride := range rides {
 		ridesObjects = append(ridesObjects, Ride{
-			ID:         ride.GetStringDataValue("id"),
+			ID:         ride.Id,
+			Name:       ride.GetStringDataValue("ride_name"),
 			GroupSize:  ride.GetIntDataValue("group_size"),
 			OriginLat:  ride.GetStringDataValue("origin_latitude"),
 			OriginLong: ride.GetStringDataValue("origin_longitude"),
 			DestLat:    ride.GetStringDataValue("dest_latitude"),
-			DestLong:   ride.GetStringDataValue("dest_longitude")})
+			DestLong:   ride.GetStringDataValue("dest_longitude"),
+			InRide:     ride.GetBoolDataValue("in_ride")})
 	}
 
 	return ridesObjects

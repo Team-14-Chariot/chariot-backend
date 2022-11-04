@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
+	. "github.com/Team-14-Chariot/chariot-backend/models"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
@@ -22,7 +23,7 @@ type requestRideBody struct {
 	GroupSize  int    `json:"group_size"`
 }
 
-func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/requestRide",
@@ -53,6 +54,9 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 					newRide.SetDataValue("group_size", body.GroupSize)
 
 					app.Dao().SaveRecord(newRide)
+
+					helpers.UpdateDriverQueues(app, body.EventID, queues)
+
 					return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
 				}
 

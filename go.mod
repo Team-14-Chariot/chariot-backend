@@ -26,7 +26,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.19 // indirect
 	github.com/aws/smithy-go v1.13.3 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
-	github.com/dominikbraun/graph v0.13.0 // indirect
+	github.com/dominikbraun/graph v0.14.0 // indirect
 	github.com/domodwyer/mailyak/v3 v3.3.4 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.1 // indirect

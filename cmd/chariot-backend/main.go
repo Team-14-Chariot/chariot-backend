@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	. "github.com/Team-14-Chariot/chariot-backend/models"
 	"github.com/Team-14-Chariot/chariot-backend/routes"
 	"github.com/pocketbase/pocketbase"
 )
@@ -10,7 +11,9 @@ import (
 func main() {
 	app := pocketbase.New()
 
-	routes.Routes(app)
+	queues := make(map[string]DriverQueue)
+
+	routes.Routes(app, queues)
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)

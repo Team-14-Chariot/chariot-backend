@@ -27,7 +27,7 @@ func ConvertToDriverObject(drivers []models.Record) []Driver {
 
 	for _, driver := range drivers {
 		driverObjects = append(driverObjects, Driver{
-			ID:          driver.GetStringDataValue("id"),
+			ID:          driver.Id,
 			Capacity:    driver.GetIntDataValue("car_capacity"),
 			CurrentLat:  driver.GetStringDataValue("current_latitude"),
 			CurrentLong: driver.GetStringDataValue("current_longitude"),
