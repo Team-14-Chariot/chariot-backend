@@ -25,7 +25,7 @@ type queueResp struct {
 	Rides      []Ride `json:"rides"`
 }
 
-func getRideQueues(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]DriverQueue) error {
+func getRideQueues(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/getRideQueues",

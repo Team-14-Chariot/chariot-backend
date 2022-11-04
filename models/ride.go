@@ -10,5 +10,6 @@ type Ride struct {
 	DestLong   string
 	RideLength float64
 	InRide     bool `json:"inRide"`
+	DriverID   string
 	Edges      []Edge
 }

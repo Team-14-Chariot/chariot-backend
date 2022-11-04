@@ -16,7 +16,7 @@ type testBody struct {
 	EventID string `json:"event_id"`
 }
 
-func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]DriverQueue) error {
+func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/test",

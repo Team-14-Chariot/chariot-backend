@@ -6,7 +6,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func Routes(app *pocketbase.PocketBase, queues map[string]DriverQueue) {
+func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return requestRide(e, app, queues)
 	})

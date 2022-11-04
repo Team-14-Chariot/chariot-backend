@@ -11,7 +11,7 @@ import (
 func main() {
 	app := pocketbase.New()
 
-	queues := make(map[string]DriverQueue)
+	queues := make(map[string]*DriverQueue)
 
 	routes.Routes(app, queues)
 

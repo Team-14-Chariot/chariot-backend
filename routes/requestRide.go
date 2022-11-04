@@ -24,7 +24,7 @@ type requestRideBody struct {
 	GroupSize  int    `json:"group_size"`
 }
 
-func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]DriverQueue) error {
+func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/requestRide",
@@ -58,7 +58,7 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[stri
 
 					app.Dao().SaveRecord(newRide)
 
-					// helpers.UpdateDriverQueues(app, body.EventID, queues)
+					helpers.UpdateDriverQueues(app, body.EventID, queues)
 
 					return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
 				}

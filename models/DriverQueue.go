@@ -55,8 +55,8 @@ func (queue *DriverQueue) GetRides() []Ride {
 	return rides
 }
 
-func (queue *DriverQueue) GetLastRide() Ride {
-	return *queue.prev.RideInfo
+func (queue *DriverQueue) GetLastRide() *Ride {
+	return queue.prev.RideInfo
 }
 
 func (queue *DriverQueue) UpdateLastRide(ride *Ride) {
@@ -80,6 +80,37 @@ func (queue *DriverQueue) PopRide() Ride {
 		return *toReturn
 	}
 	return Ride{}
+}
+
+func (queue *DriverQueue) RemoveRide(ride *Ride) {
+	i := 0
+	itQueue := queue
+
+	for {
+		if itQueue.RideInfo.ID == ride.ID {
+			if itQueue.next == queue && queue.Length() == 1 { // Only Item
+				queue.RideInfo = nil
+				break
+			}
+
+			if i == 0 {
+				queue.PopRide()
+				break
+			}
+
+			itQueue.prev.next = itQueue.next
+			itQueue.next.prev = itQueue.prev
+			itQueue.RideInfo = nil
+
+			break
+		}
+
+		itQueue = itQueue.next
+		if itQueue == queue {
+			break
+		}
+		i++
+	}
 }
 
 func (queue *DriverQueue) Length() int {

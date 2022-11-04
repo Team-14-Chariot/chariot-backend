@@ -1,6 +1,6 @@
 package models
 
 type Edge struct {
-	ID   string
-	Time int
+	ID     string
+	Weight float64
 }
