@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"fmt"
+
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 	. "github.com/Team-14-Chariot/chariot-backend/tools"
 
@@ -43,14 +45,18 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 
 		startingNode := queues[drivers[i].ID]
 		if startingNode.GetLastRide() == nil { // Driver has no rides yet
+			fmt.Println("No Rides Yet")
 			edgeIndex, newEdge := getLowestDriverEdge(drivers[i])
 			if edgeIndex != -1 {
 				newRideIndex, newRide := findRide(rides, newEdge.ID)
 				if isAssigned(assigned, newEdge.ID) {
+					fmt.Println("Assigned already")
 					oldDriverQueue := queues[newRide.DriverID]
 
 					oldTripTime := calculateTotalTripLength(oldDriverQueue, findDriver(drivers, newRide.DriverID), newEdge.ID)
 					newTripTime := calculateTotalTripLength(startingNode, drivers[i], newEdge.ID) + newEdge.Weight
+					fmt.Printf("Old Trip Time: %f\n", oldTripTime)
+					fmt.Printf("New Trip Time: %f\n", newTripTime)
 
 					if newTripTime < oldTripTime {
 						oldDriverQueue.RemoveRide(&newRide)
@@ -60,20 +66,25 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						drivers[i].Edges = deleteDriverEdge(edgeIndex, drivers[i])
 					}
 				} else {
+					fmt.Println("Not assigned yet")
 					rides[newRideIndex].DriverID = drivers[i].ID
 					startingNode.InsertRide(&newRide)
 					assigned = append(assigned, newRide.ID)
 				}
 			}
 		} else {
+			fmt.Println("Other Rides Already")
 			edgeIndex, newEdge := getLowestRideEdge(*startingNode.GetLastRide())
 			if edgeIndex != -1 {
 				newRideIndex, newRide := findRide(rides, newEdge.ID)
 				if isAssigned(assigned, newEdge.ID) {
+					fmt.Println("Assigned already")
 					oldDriverQueue := queues[newRide.DriverID]
 
 					oldTripTime := calculateTotalTripLength(oldDriverQueue, findDriver(drivers, newRide.DriverID), newEdge.ID)
 					newTripTime := calculateTotalTripLength(startingNode, drivers[i], newEdge.ID) + newEdge.Weight
+					fmt.Printf("Old Trip Time: %f\n", oldTripTime)
+					fmt.Printf("New Trip Time: %f\n", newTripTime)
 
 					if newTripTime < oldTripTime {
 						oldDriverQueue.RemoveRide(&newRide)
@@ -84,6 +95,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						rides[rideIndex].Edges = deleteRideEdge(edgeIndex, rides[rideIndex])
 					}
 				} else {
+					fmt.Println("Not assigned yet")
 					rides[newRideIndex].DriverID = drivers[i].ID
 					startingNode.InsertRide(&newRide)
 					assigned = append(assigned, newRide.ID)
