@@ -35,9 +35,5 @@ func getEta(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 		},
 	})
 
-		
-
-	
-
 	return nil
 }
