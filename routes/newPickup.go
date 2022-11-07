@@ -16,7 +16,10 @@ type requestRideBody struct {
 	EventID    string `json:"event_id"`
 	OriginLat  string `json:"origin_latitude"`
 	OriginLong string `json:"origin_longitude"`
-	
+	DestLat    string `json:"dest_latitude"`
+	DestLong   string `json:"dest_longitude"`
+	RiderName  string `json:"rider_name"`
+	GroupSize  int    `json:"group_size"`
 	Ride_id    string `json:"ride_id"`
 }
 
