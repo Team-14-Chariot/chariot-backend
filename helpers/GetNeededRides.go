@@ -22,11 +22,11 @@ func GetNeededRides(app *pocketbase.PocketBase, rides_col *models.Collection, ev
 	return rides
 }
 
-func ConvertToRideObject(rides []models.Record) []Ride {
-	var ridesObjects []Ride
+func ConvertToRideObject(rides []models.Record) []*Ride {
+	var ridesObjects []*Ride
 
 	for _, ride := range rides {
-		ridesObjects = append(ridesObjects, Ride{
+		ridesObjects = append(ridesObjects, &Ride{
 			ID:         ride.Id,
 			Name:       ride.GetStringDataValue("rider_name"),
 			GroupSize:  ride.GetIntDataValue("group_size"),

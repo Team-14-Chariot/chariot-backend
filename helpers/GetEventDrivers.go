@@ -22,8 +22,8 @@ func GetEventDrivers(app *pocketbase.PocketBase, drivers_col *models.Collection,
 	return drivers
 }
 
-func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) []Driver {
-	var driverObjects []Driver
+func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) []*Driver {
+	var driverObjects []*Driver
 
 	for _, driver := range drivers {
 		if driver.GetBoolDataValue("in_ride") {
@@ -32,7 +32,7 @@ func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) 
 
 			for _, ride := range rides {
 				if ride.GetDataValue("driver_id") == driver.Id {
-					driverObjects = append(driverObjects, Driver{
+					driverObjects = append(driverObjects, &Driver{
 						ID:          driver.Id,
 						Capacity:    driver.GetIntDataValue("car_capacity"),
 						CurrentLat:  ride.GetStringDataValue("dest_latitude"),
@@ -42,7 +42,7 @@ func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) 
 				}
 			}
 		} else {
-			driverObjects = append(driverObjects, Driver{
+			driverObjects = append(driverObjects, &Driver{
 				ID:          driver.Id,
 				Capacity:    driver.GetIntDataValue("car_capacity"),
 				CurrentLat:  driver.GetStringDataValue("current_latitude"),
