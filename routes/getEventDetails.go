@@ -19,6 +19,7 @@ type eventDetailsResp struct {
 	Address        string `json:"address"`
 	EventName      string `json:"eventName"`
 	RiderPassword  string `json:"ridePassword"`
+	DriverPassword string `json:"driverPassword"`
 }
 
 func getEventdetails(e *core.ServeEvent, app *pocketbase.PocketBase) error {
@@ -38,6 +39,7 @@ func getEventdetails(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 					Address:        event.GetStringDataValue("address"),
 					EventName:      event.GetStringDataValue("event_name"),
 					RiderPassword:  event.GetStringDataValue("rider_password"),
+					DriverPassword: event.GetStringDataValue("driver_password"),
 				}
 
 				return c.JSON(200, resp)
