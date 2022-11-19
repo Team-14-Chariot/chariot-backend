@@ -10,11 +10,12 @@ import (
 )
 
 type updateEventDetailsBody struct {
-	EventID       string `json:"event_id"`
-	Name          string `json:"name"`
-	Address       string `json:"address"`
-	MaxRadius     int    `json:"max_radius"`
-	RiderPassword string `json:"rider_password"`
+	EventID        string `json:"event_id"`
+	Name           string `json:"name"`
+	Address        string `json:"address"`
+	MaxRadius      int    `json:"max_radius"`
+	RiderPassword  string `json:"rider_password"`
+	DriverPassword string `json:"driver_password"`
 }
 
 func updateEventDetails(e *core.ServeEvent, app *pocketbase.PocketBase) error {
@@ -38,6 +39,10 @@ func updateEventDetails(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 				if len(body.RiderPassword) > 0 {
 					event.SetDataValue("rider_password", body.RiderPassword)
+				}
+
+				if len(body.DriverPassword) > 0 {
+					event.SetDataValue("driver_password", body.DriverPassword)
 				}
 
 				if body.MaxRadius > 0 {
