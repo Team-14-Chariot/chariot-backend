@@ -1,9 +1,6 @@
 package helpers
 
 import (
-	"encoding/json"
-	"fmt"
-
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 	. "github.com/Team-14-Chariot/chariot-backend/tools"
 
@@ -46,27 +43,20 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 		ridesMap[rides[i].ID] = rides[i] // Adding the ride to the map for faster lookup
 	}
 
-	// for _, driver := range drivers {
-	// 	out, _ := json.MarshalIndent(driver, "", "  ")
-	// 	fmt.Println(string(out))
-	// }
-
-	// for _, ride := range rides {
-	// 	out, _ := json.MarshalIndent(ride, "", "  ")
-	// 	fmt.Println(string(out))
-	// }
-
+	timesRun := 0
 	assigned := []string{}
-	i := 0 // Index of the driver who's queue is being added to
-	anyChanges := false
+	i := 0                // Index of the driver who's queue is being added to
+	changesThisRound := 0 // Keeps track of the number of changes that occur going through each driver to make sure the optimal solution is reached
 	for {
-		anyChanges = false
+		if i == 0 {
+			changesThisRound = 0
+		}
 
 		driverQueue := queues[drivers[i].ID]
 		if driverQueue.GetLastRide() == nil { // Driver has no rides in their queue
 			edgeIndex, shortestEdge := findShortestDriverEdge(*drivers[i])
 
-			if edgeIndex != -1 { // This should always be the case
+			if edgeIndex != -1 {
 				rideToAssign := ridesMap[shortestEdge.ID] // The ride the edge points to
 
 				if isAssigned(assigned, rideToAssign.ID) { // If the ride is already assigned to another driver
@@ -74,32 +64,22 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 
 					oldTripTime := calculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
 					newTripTime := calculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
-					out1, _ := json.MarshalIndent(oldDriverQueue.GetRides(), "", "  ")
-					fmt.Println(string(out1))
-					out2, _ := json.MarshalIndent(oldDriverQueue.GetRides(), "", "  ")
-					fmt.Println(string(out2))
-					fmt.Printf("Index: %d, old trip time: %f, new trip time: %f\n", i, oldTripTime, newTripTime)
 
 					if newTripTime < oldTripTime { // Remove the ride from the driver queue it was assigned to and add it to the current driver queue
 						oldDriverQueue.RemoveRide(rideToAssign)
 						rideToAssign.DriverID = drivers[i].ID
 						driverQueue.InsertRide(rideToAssign)
-						anyChanges = true
-						fmt.Printf("Here5, index %d\n", i)
+						changesThisRound++
 					} else {
-						fmt.Printf("Here3, index %d\n", i)
 						drivers[i].Edges = deleteDriverEdge(edgeIndex, *drivers[i])
-						anyChanges = true
+						changesThisRound++
 					}
 				} else { // The ride has not already been assigned
-					fmt.Printf("Here6, index %d\n", i)
 					rideToAssign.DriverID = drivers[i].ID
 					driverQueue.InsertRide(rideToAssign)
 					assigned = append(assigned, rideToAssign.ID)
-					anyChanges = true
+					changesThisRound++
 				}
-			} else {
-				fmt.Printf("Here1, index %d\n", i)
 			}
 		} else { // The driver already has rides in their queue
 			edgeIndex, shortestEdge := getShortestRideEdge(*driverQueue.GetLastRide())
@@ -112,53 +92,34 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 
 					oldTripTime := calculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
 					newTripTime := calculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
-					out1, _ := json.MarshalIndent(oldDriverQueue.GetRides(), "", "  ")
-					fmt.Println(string(out1))
-					out2, _ := json.MarshalIndent(driverQueue.GetRides(), "", "  ")
-					fmt.Println(string(out2))
-					fmt.Printf("Index: %d, old trip time: %f, new trip time: %f\n", i, oldTripTime, newTripTime)
 
 					if newTripTime < oldTripTime {
 						oldDriverQueue.RemoveRide(rideToAssign)
 						rideToAssign.DriverID = drivers[i].ID
 						driverQueue.InsertRide(rideToAssign)
-						anyChanges = true
-						fmt.Printf("Here7, index %d\n", i)
+						changesThisRound++
 					} else {
-						fmt.Printf("Here4, index %d\n", i)
 						driverQueue.GetLastRide().Edges = deleteRideEdge(edgeIndex, *driverQueue.GetLastRide())
-						anyChanges = true
+						changesThisRound++
 					}
 				} else {
-					fmt.Printf("Here8, index %d\n", i)
 					rideToAssign.DriverID = drivers[i].ID
 					driverQueue.InsertRide(rideToAssign)
 					assigned = append(assigned, rideToAssign.ID)
-					anyChanges = true
+					changesThisRound++
 				}
-			} else {
-				fmt.Printf("Here2, index %d\n", i)
 			}
 		}
 
 		i++
 		if i == len(drivers) {
-			if len(assigned) == len(rides) && !anyChanges {
+			if len(assigned) == len(rides) && changesThisRound == 0 {
 				break
 			}
 
 			i = 0
 		}
-	}
-	fmt.Println("----AFTER----")
-	for _, driver := range drivers {
-		out, _ := json.MarshalIndent(driver, "", "  ")
-		fmt.Println(string(out))
-	}
-
-	for _, ride := range rides {
-		out, _ := json.MarshalIndent(ride, "", "  ")
-		fmt.Println(string(out))
+		timesRun++
 	}
 }
 
@@ -221,7 +182,7 @@ func calculateTotalTripLength(queue *DriverQueue, driver Driver, endingID string
 		if i == 0 {
 			totalLength += findDriverToFirstRideEdgeWeight(rides[i].ID, driver)
 		} else {
-			totalLength += findRidetoRideEdgeWeight(rides[i-1].ID, rides[i])
+			totalLength += findRidetoRideEdgeWeight(rides[i].ID, rides[i-1])
 		}
 
 		if rides[i].ID == endingID {
