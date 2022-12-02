@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"sync"
+
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
@@ -47,8 +49,10 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 		return endRide(e, app)
 	})
 
+	mutex := &sync.RWMutex{}
+
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return getEta(e, app, queues)
+		return getEta(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
