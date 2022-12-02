@@ -20,38 +20,37 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 	ridesMap := make(map[string]*Ride)                    // Hashmap for finding ride pointers given a ride id to speed up finding rides from edges
 	driversMap := make(map[string]*Driver)                // Hashmap for finding driver points given a driver id to speed up finding drivers when they have already been assigned a ride
 
-	if len(rides) == 0 || len(drivers) == 0 {
+	if rideForEta != nil {
+		rides = append(rides, rideForEta)
+	}
 
-		if rideForEta != nil {
-			rides = append(rides, rideForEta)
+	// Going through all drivers and initilizing their queues or resetting them if they already existed
+	// Also adds edges to all rides with weights representing drive time from drivers location or where their ongoing ride will end
+	for i, driver := range drivers {
+		queues[driver.ID] = InitDriverQueue()
+		for _, ride := range rides {
+			length := CalculateLength(driver.CurrentLat, driver.CurrentLong, ride.OriginLat, ride.OriginLong)
+			drivers[i].Edges = append(driver.Edges, Edge{ID: ride.ID, Weight: length})
 		}
 
-		// Going through all drivers and initilizing their queues or resetting them if they already existed
-		// Also adds edges to all rides with weights representing drive time from drivers location or where their ongoing ride will end
-		for i, driver := range drivers {
-			queues[driver.ID] = InitDriverQueue()
-			for _, ride := range rides {
-				length := CalculateLength(driver.CurrentLat, driver.CurrentLong, ride.OriginLat, ride.OriginLong)
-				drivers[i].Edges = append(driver.Edges, Edge{ID: ride.ID, Weight: length})
+		driversMap[drivers[i].ID] = drivers[i]
+	}
+
+	// Going through all rides and adding edges with drive times between the start and ends of rides
+	for i, _ := range rides {
+		for j, _ := range rides {
+			if j > i {
+				currRideToOtherLength := CalculateLength(rides[i].DestLat, rides[i].DestLong, rides[j].OriginLat, rides[j].OriginLong)
+				rides[i].Edges = append(rides[i].Edges, Edge{ID: rides[j].ID, Weight: currRideToOtherLength})
+				OtherRideToCurrLength := CalculateLength(rides[j].DestLat, rides[j].DestLong, rides[i].OriginLat, rides[i].OriginLong)
+				rides[j].Edges = append(rides[j].Edges, Edge{ID: rides[i].ID, Weight: OtherRideToCurrLength})
 			}
-
-			driversMap[drivers[i].ID] = drivers[i]
 		}
 
-		// Going through all rides and adding edges with drive times between the start and ends of rides
-		for i, _ := range rides {
-			for j, _ := range rides {
-				if j > i {
-					currRideToOtherLength := CalculateLength(rides[i].DestLat, rides[i].DestLong, rides[j].OriginLat, rides[j].OriginLong)
-					rides[i].Edges = append(rides[i].Edges, Edge{ID: rides[j].ID, Weight: currRideToOtherLength})
-					OtherRideToCurrLength := CalculateLength(rides[j].DestLat, rides[j].DestLong, rides[i].OriginLat, rides[i].OriginLong)
-					rides[j].Edges = append(rides[j].Edges, Edge{ID: rides[i].ID, Weight: OtherRideToCurrLength})
-				}
-			}
+		ridesMap[rides[i].ID] = rides[i] // Adding the ride to the map for faster lookup
+	}
 
-			ridesMap[rides[i].ID] = rides[i] // Adding the ride to the map for faster lookup
-		}
-
+	if len(drivers) != 0 {
 		timesRun := 0
 		assigned := []string{}
 		i := 0                // Index of the driver who's queue is being added to
