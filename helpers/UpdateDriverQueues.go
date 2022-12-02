@@ -76,7 +76,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						if newTripTime < oldTripTime { // Remove the ride from the driver queue it was assigned to and add it to the current driver queue
 							oldDriverQueue.RemoveRide(rideToAssign)
 							rideToAssign.DriverID = drivers[i].ID
-							if rideForEta != nil || rideToAssign.ID != rideForEta.ID {
+							if rideForEta != nil && rideToAssign.ID != rideForEta.ID {
 								updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 							}
 							driverQueue.InsertRide(rideToAssign)
@@ -87,7 +87,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						}
 					} else { // The ride has not already been assigned
 						rideToAssign.DriverID = drivers[i].ID
-						if rideForEta != nil || rideToAssign.ID != rideForEta.ID {
+						if rideForEta != nil && rideToAssign.ID != rideForEta.ID {
 							updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 						}
 						driverQueue.InsertRide(rideToAssign)
@@ -110,7 +110,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						if newTripTime < oldTripTime {
 							oldDriverQueue.RemoveRide(rideToAssign)
 							rideToAssign.DriverID = drivers[i].ID
-							if rideForEta != nil || rideToAssign.ID != rideForEta.ID {
+							if rideForEta != nil && rideToAssign.ID != rideForEta.ID {
 								updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 							}
 							driverQueue.InsertRide(rideToAssign)
@@ -121,7 +121,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 						}
 					} else {
 						rideToAssign.DriverID = drivers[i].ID
-						if rideForEta != nil || rideToAssign.ID != rideForEta.ID {
+						if rideForEta != nil && rideToAssign.ID != rideForEta.ID {
 							updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 						}
 						driverQueue.InsertRide(rideToAssign)
