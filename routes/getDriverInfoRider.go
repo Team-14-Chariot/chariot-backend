@@ -14,9 +14,11 @@ type getDriverInfoRiderBody struct {
 }
 
 type driverInfoRiderResp struct {
-	Name           string `json:"name"`
-	CarDescription string `json:"car_description"`
-	CarPlate       string `json:"car_license_plate"`
+	Name             string `json:"name"`
+	CarDescription   string `json:"car_description"`
+	CarPlate         string `json:"car_license_plate"`
+	CurrentLatitude  string `json:"latitude"`
+	CurrentLongitude string `json:"longitude"`
 }
 
 func getDriverInfoRider(e *core.ServeEvent, app *pocketbase.PocketBase) error {
@@ -36,9 +38,11 @@ func getDriverInfoRider(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 				if driver != nil {
 					resp := driverInfoRiderResp{
-						Name:           driver.GetStringDataValue("name"),
-						CarDescription: driver.GetStringDataValue("car_description"),
-						CarPlate:       driver.GetStringDataValue("car_licence_plate"),
+						Name:             driver.GetStringDataValue("name"),
+						CarDescription:   driver.GetStringDataValue("car_description"),
+						CarPlate:         driver.GetStringDataValue("car_licence_plate"),
+						CurrentLatitude:  driver.GetStringDataValue("current_latitude"),
+						CurrentLongitude: driver.GetStringDataValue("current_longitude"),
 					}
 
 					return c.JSON(200, resp)
