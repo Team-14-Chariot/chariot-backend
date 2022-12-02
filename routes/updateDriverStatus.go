@@ -15,7 +15,7 @@ type updateStatusBody struct {
 	DriverLat  string `json:"latitude"`
 	DriverLong string `json:"longitude"`
 	Eta        int    `json:"eta"`
-	HasRider   bool   `json:has_rider`
+	HasRider   bool   `json:"has_rider"`
 }
 
 func updateDriverStatus(e *core.ServeEvent, app *pocketbase.PocketBase) error {
