@@ -19,6 +19,7 @@ type joinEventBody struct {
 	CarCapacity    int    `json:"car_capacity"`
 	CarDescription string `json:"car_description"`
 	CarPlate       string `json:"car_license_plate"`
+	DriverPassword string `json:"driver_password"`
 }
 
 func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
@@ -34,6 +35,12 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string
 			events, _ := app.Dao().FindCollectionByNameOrId("events")
 			event, _ := app.Dao().FindFirstRecordByData(events, "event_id", body.EventCode)
 			if event != nil {
+				if len(event.GetStringDataValue("driver_password")) > 0 {
+					if event.GetStringDataValue("driver_password") != body.DriverPassword {
+						return c.NoContent(400)
+					}
+				}
+
 				newDriver := models.NewRecord(drivers)
 
 				newDriver.SetDataValue("name", body.Name)

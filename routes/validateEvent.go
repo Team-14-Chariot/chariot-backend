@@ -25,6 +25,9 @@ func validateEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			event, _ := app.Dao().FindFirstRecordByData(events, "event_id", body.EventID)
 
 			if event != nil {
+				if len(event.GetStringDataValue("driver_password")) > 0 {
+					return c.NoContent(205)
+				}
 				return c.NoContent(200)
 			}
 
