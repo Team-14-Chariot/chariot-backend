@@ -8,7 +8,7 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue) {
+func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue, rideForEta *Ride) {
 	drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
 	driversRecords := GetEventDrivers(app, drivers_col, eventID)
 	rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
@@ -18,113 +18,128 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 	ridesMap := make(map[string]*Ride)                    // Hashmap for finding ride pointers given a ride id to speed up finding rides from edges
 	driversMap := make(map[string]*Driver)                // Hashmap for finding driver points given a driver id to speed up finding drivers when they have already been assigned a ride
 
-	// Going through all drivers and initilizing their queues or resetting them if they already existed
-	// Also adds edges to all rides with weights representing drive time from drivers location or where their ongoing ride will end
-	for i, driver := range drivers {
-		queues[driver.ID] = InitDriverQueue()
-		for _, ride := range rides {
-			length := CalculateLength(driver.CurrentLat, driver.CurrentLong, ride.OriginLat, ride.OriginLong)
-			drivers[i].Edges = append(driver.Edges, Edge{ID: ride.ID, Weight: length})
+	if len(rides) == 0 || len(drivers) == 0 {
+
+		if rideForEta != nil {
+			rides = append(rides, rideForEta)
 		}
 
-		driversMap[drivers[i].ID] = drivers[i]
-	}
-
-	// Going through all rides and adding edges with drive times between the start and ends of rides
-	for i, _ := range rides {
-		for j, _ := range rides {
-			if j > i {
-				currRideToOtherLength := CalculateLength(rides[i].DestLat, rides[i].DestLong, rides[j].OriginLat, rides[j].OriginLong)
-				rides[i].Edges = append(rides[i].Edges, Edge{ID: rides[j].ID, Weight: currRideToOtherLength})
-				OtherRideToCurrLength := CalculateLength(rides[j].DestLat, rides[j].DestLong, rides[i].OriginLat, rides[i].OriginLong)
-				rides[j].Edges = append(rides[j].Edges, Edge{ID: rides[i].ID, Weight: OtherRideToCurrLength})
+		// Going through all drivers and initilizing their queues or resetting them if they already existed
+		// Also adds edges to all rides with weights representing drive time from drivers location or where their ongoing ride will end
+		for i, driver := range drivers {
+			queues[driver.ID] = InitDriverQueue()
+			for _, ride := range rides {
+				length := CalculateLength(driver.CurrentLat, driver.CurrentLong, ride.OriginLat, ride.OriginLong)
+				drivers[i].Edges = append(driver.Edges, Edge{ID: ride.ID, Weight: length})
 			}
+
+			driversMap[drivers[i].ID] = drivers[i]
 		}
 
-		ridesMap[rides[i].ID] = rides[i] // Adding the ride to the map for faster lookup
-	}
-
-	timesRun := 0
-	assigned := []string{}
-	i := 0                // Index of the driver who's queue is being added to
-	changesThisRound := 0 // Keeps track of the number of changes that occur going through each driver to make sure the optimal solution is reached
-	for {
-		if i == 0 {
-			changesThisRound = 0
-		}
-
-		driverQueue := queues[drivers[i].ID]
-		if driverQueue.GetLastRide() == nil { // Driver has no rides in their queue
-			edgeIndex, shortestEdge := findShortestDriverEdge(*drivers[i])
-
-			if edgeIndex != -1 {
-				rideToAssign := ridesMap[shortestEdge.ID] // The ride the edge points to
-
-				if isAssigned(assigned, rideToAssign.ID) { // If the ride is already assigned to another driver
-					oldDriverQueue := queues[rideToAssign.DriverID]
-
-					oldTripTime := calculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
-					newTripTime := calculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
-
-					if newTripTime < oldTripTime { // Remove the ride from the driver queue it was assigned to and add it to the current driver queue
-						oldDriverQueue.RemoveRide(rideToAssign)
-						rideToAssign.DriverID = drivers[i].ID
-						updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
-						driverQueue.InsertRide(rideToAssign)
-						changesThisRound++
-					} else {
-						drivers[i].Edges = deleteDriverEdge(edgeIndex, *drivers[i])
-						changesThisRound++
-					}
-				} else { // The ride has not already been assigned
-					rideToAssign.DriverID = drivers[i].ID
-					updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
-					driverQueue.InsertRide(rideToAssign)
-					assigned = append(assigned, rideToAssign.ID)
-					changesThisRound++
+		// Going through all rides and adding edges with drive times between the start and ends of rides
+		for i, _ := range rides {
+			for j, _ := range rides {
+				if j > i {
+					currRideToOtherLength := CalculateLength(rides[i].DestLat, rides[i].DestLong, rides[j].OriginLat, rides[j].OriginLong)
+					rides[i].Edges = append(rides[i].Edges, Edge{ID: rides[j].ID, Weight: currRideToOtherLength})
+					OtherRideToCurrLength := CalculateLength(rides[j].DestLat, rides[j].DestLong, rides[i].OriginLat, rides[i].OriginLong)
+					rides[j].Edges = append(rides[j].Edges, Edge{ID: rides[i].ID, Weight: OtherRideToCurrLength})
 				}
 			}
-		} else { // The driver already has rides in their queue
-			edgeIndex, shortestEdge := getShortestRideEdge(*driverQueue.GetLastRide())
 
-			if edgeIndex != -1 {
-				rideToAssign := ridesMap[shortestEdge.ID]
+			ridesMap[rides[i].ID] = rides[i] // Adding the ride to the map for faster lookup
+		}
 
-				if isAssigned(assigned, rideToAssign.ID) {
-					oldDriverQueue := queues[rideToAssign.DriverID]
+		timesRun := 0
+		assigned := []string{}
+		i := 0                // Index of the driver who's queue is being added to
+		changesThisRound := 0 // Keeps track of the number of changes that occur going through each driver to make sure the optimal solution is reached
+		for {
+			if i == 0 {
+				changesThisRound = 0
+			}
 
-					oldTripTime := calculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
-					newTripTime := calculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
+			driverQueue := queues[drivers[i].ID]
+			if driverQueue.GetLastRide() == nil { // Driver has no rides in their queue
+				edgeIndex, shortestEdge := findShortestDriverEdge(*drivers[i])
 
-					if newTripTime < oldTripTime {
-						oldDriverQueue.RemoveRide(rideToAssign)
+				if edgeIndex != -1 {
+					rideToAssign := ridesMap[shortestEdge.ID] // The ride the edge points to
+
+					if isAssigned(assigned, rideToAssign.ID) { // If the ride is already assigned to another driver
+						oldDriverQueue := queues[rideToAssign.DriverID]
+
+						oldTripTime := CalculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
+						newTripTime := CalculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
+
+						if newTripTime < oldTripTime { // Remove the ride from the driver queue it was assigned to and add it to the current driver queue
+							oldDriverQueue.RemoveRide(rideToAssign)
+							rideToAssign.DriverID = drivers[i].ID
+							if rideToAssign.ID != rideForEta.ID {
+								updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
+							}
+							driverQueue.InsertRide(rideToAssign)
+							changesThisRound++
+						} else {
+							drivers[i].Edges = deleteDriverEdge(edgeIndex, *drivers[i])
+							changesThisRound++
+						}
+					} else { // The ride has not already been assigned
 						rideToAssign.DriverID = drivers[i].ID
-						updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
+						if rideToAssign.ID != rideForEta.ID {
+							updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
+						}
 						driverQueue.InsertRide(rideToAssign)
-						changesThisRound++
-					} else {
-						driverQueue.GetLastRide().Edges = deleteRideEdge(edgeIndex, *driverQueue.GetLastRide())
+						assigned = append(assigned, rideToAssign.ID)
 						changesThisRound++
 					}
-				} else {
-					rideToAssign.DriverID = drivers[i].ID
-					updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
-					driverQueue.InsertRide(rideToAssign)
-					assigned = append(assigned, rideToAssign.ID)
-					changesThisRound++
+				}
+			} else { // The driver already has rides in their queue
+				edgeIndex, shortestEdge := getShortestRideEdge(*driverQueue.GetLastRide())
+
+				if edgeIndex != -1 {
+					rideToAssign := ridesMap[shortestEdge.ID]
+
+					if isAssigned(assigned, rideToAssign.ID) {
+						oldDriverQueue := queues[rideToAssign.DriverID]
+
+						oldTripTime := CalculateTotalTripLength(oldDriverQueue, *driversMap[rideToAssign.DriverID], rideToAssign.ID)
+						newTripTime := CalculateTotalTripLength(driverQueue, *drivers[i], rideToAssign.ID) + shortestEdge.Weight
+
+						if newTripTime < oldTripTime {
+							oldDriverQueue.RemoveRide(rideToAssign)
+							rideToAssign.DriverID = drivers[i].ID
+							if rideToAssign.ID != rideForEta.ID {
+								updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
+							}
+							driverQueue.InsertRide(rideToAssign)
+							changesThisRound++
+						} else {
+							driverQueue.GetLastRide().Edges = deleteRideEdge(edgeIndex, *driverQueue.GetLastRide())
+							changesThisRound++
+						}
+					} else {
+						rideToAssign.DriverID = drivers[i].ID
+						if rideToAssign.ID != rideForEta.ID {
+							updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
+						}
+						driverQueue.InsertRide(rideToAssign)
+						assigned = append(assigned, rideToAssign.ID)
+						changesThisRound++
+					}
 				}
 			}
-		}
 
-		i++
-		if i == len(drivers) {
-			if len(assigned) == len(rides) && changesThisRound == 0 {
-				break
+			i++
+			if i == len(drivers) {
+				if len(assigned) == len(rides) && changesThisRound == 0 {
+					break
+				}
+
+				i = 0
 			}
-
-			i = 0
+			timesRun++
 		}
-		timesRun++
 	}
 }
 
@@ -174,7 +189,7 @@ func isAssigned(assigned []string, ID string) bool {
 	return false
 }
 
-func calculateTotalTripLength(queue *DriverQueue, driver Driver, endingID string) float64 {
+func CalculateTotalTripLength(queue *DriverQueue, driver Driver, endingID string) float64 {
 	totalLength := 0.0
 	rides := queue.GetRides()
 

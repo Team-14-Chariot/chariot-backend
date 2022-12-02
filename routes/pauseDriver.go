@@ -31,7 +31,7 @@ func pauseDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[stri
 			if driver != nil {
 				driver.SetDataValue("active", false)
 
-				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues)
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil)
 
 				app.Dao().SaveRecord(driver)
 

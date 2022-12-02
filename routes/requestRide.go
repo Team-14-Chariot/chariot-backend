@@ -58,7 +58,7 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[stri
 
 					app.Dao().SaveRecord(newRide)
 
-					helpers.UpdateDriverQueues(app, body.EventID, queues)
+					helpers.UpdateDriverQueues(app, body.EventID, queues, nil)
 
 					return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
 				}

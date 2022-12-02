@@ -54,7 +54,7 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string
 
 				app.Dao().SaveRecord(newDriver)
 
-				helpers.UpdateDriverQueues(app, body.EventCode, queues)
+				helpers.UpdateDriverQueues(app, body.EventCode, queues, nil)
 
 				return c.JSON(200, map[string]interface{}{"driver_id": newDriver.Id})
 			}

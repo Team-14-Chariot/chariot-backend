@@ -31,7 +31,7 @@ func resumeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[str
 			if driver != nil {
 				driver.SetDataValue("active", true)
 
-				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues)
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil)
 
 				app.Dao().SaveRecord(driver)
 
