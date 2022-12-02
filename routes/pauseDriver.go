@@ -3,7 +3,6 @@ package routes
 import (
 	"net/http"
 
-	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 
 	"github.com/labstack/echo/v5"
@@ -30,8 +29,6 @@ func pauseDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[stri
 
 			if driver != nil {
 				driver.SetDataValue("active", false)
-
-				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil)
 
 				app.Dao().SaveRecord(driver)
 
