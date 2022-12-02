@@ -92,6 +92,10 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return validateDriverPassword(e, app)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return test(e, app, queues)
 	})
 }
