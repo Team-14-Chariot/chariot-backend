@@ -33,7 +33,7 @@ func removeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[str
 					eventId := driver.GetStringDataValue("event_id")
 					app.Dao().DeleteRecord(driver)
 
-					helpers.UpdateDriverQueues(app, eventId, queues, nil)
+					helpers.UpdateDriverQueues(app, eventId, queues, nil, nil)
 
 					return c.NoContent(200)
 				}

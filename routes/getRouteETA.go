@@ -50,7 +50,7 @@ func getRouteETA(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 
 					testQueues := make(map[string]*DriverQueue)
 
-					driver := helpers.UpdateDriverQueues(app, body.EventID, testQueues, testRide)
+					driver := helpers.UpdateDriverQueues(app, body.EventID, testQueues, testRide, nil)
 					driverQueue, valid := testQueues[driver.ID]
 
 					eta := 0.0

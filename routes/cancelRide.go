@@ -32,7 +32,7 @@ func cancelRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[strin
 					eventCode := ride.GetStringDataValue("event_id")
 					app.Dao().DeleteRecord(ride)
 
-					helpers.UpdateDriverQueues(app, eventCode, queues, nil)
+					helpers.UpdateDriverQueues(app, eventCode, queues, nil, nil)
 
 					return c.NoContent(200)
 				}

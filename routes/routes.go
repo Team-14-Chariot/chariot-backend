@@ -48,7 +48,7 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return getEta(e, app)
+		return getEta(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {

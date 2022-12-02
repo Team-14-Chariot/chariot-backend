@@ -35,7 +35,7 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*
 				driver.SetDataValue("current_longitude", body.CurrentLong)
 				driver.SetDataValue("has_rider", false)
 				app.Dao().SaveRecord(driver)
-				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil)
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil, nil)
 
 				driverQueue, valid := queues[driver.Id]
 				if valid {

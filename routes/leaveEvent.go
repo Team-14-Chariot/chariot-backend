@@ -31,7 +31,7 @@ func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[strin
 			if driver != nil {
 				driver.SetDataValue("active", false)
 
-				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil)
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil, nil)
 
 				app.Dao().SaveRecord(driver)
 

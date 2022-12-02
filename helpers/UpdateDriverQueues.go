@@ -10,7 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue, rideForEta *Ride) Driver {
+func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue, rideForEta *Ride, rideForOtherEta *Ride) Driver {
 	drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
 	driversRecords := GetEventDrivers(app, drivers_col, eventID)
 	rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
@@ -144,6 +144,13 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 
 		if rideForEta != nil {
 			driver, valid := driversMap[rideForEta.DriverID]
+			if valid {
+				return *driver
+			}
+		}
+
+		if rideForOtherEta != nil {
+			driver, valid := driversMap[ridesMap[rideForOtherEta.ID].DriverID]
 			if valid {
 				return *driver
 			}

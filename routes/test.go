@@ -24,7 +24,7 @@ func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*Dri
 			var body testBody
 			c.Bind(&body)
 
-			helpers.UpdateDriverQueues(app, body.EventID, queues, nil)
+			helpers.UpdateDriverQueues(app, body.EventID, queues, nil, nil)
 
 			return c.NoContent(200)
 		},
