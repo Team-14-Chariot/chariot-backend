@@ -10,7 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 )
 
-func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue, rideForEta *Ride) {
+func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue, rideForEta *Ride) Driver {
 	drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
 	driversRecords := GetEventDrivers(app, drivers_col, eventID)
 	rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
@@ -141,9 +141,18 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 			}
 			timesRun++
 		}
+
+		if rideForEta != nil {
+			driver, valid := driversMap[rideForEta.DriverID]
+			if valid {
+				return *driver
+			}
+		}
 	} else {
 		fmt.Println("Here4")
 	}
+
+	return Driver{}
 }
 
 func findShortestDriverEdge(driver Driver) (int, Edge) {
