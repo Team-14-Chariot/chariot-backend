@@ -16,8 +16,6 @@ type getDriverEventInfoBody struct {
 type driverEventInfoResp struct {
 	RideMaxRadius int    `json:"maxRadius"`
 	Address       string `json:"address"`
-	Latitude      string `json:"latitude"`
-	Longitude     string `json:"longitude"`
 	EventName     string `json:"eventName"`
 }
 
