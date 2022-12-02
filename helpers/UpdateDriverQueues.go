@@ -5,6 +5,7 @@ import (
 	. "github.com/Team-14-Chariot/chariot-backend/tools"
 
 	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/models"
 )
 
 func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[string]*DriverQueue) {
@@ -68,6 +69,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 					if newTripTime < oldTripTime { // Remove the ride from the driver queue it was assigned to and add it to the current driver queue
 						oldDriverQueue.RemoveRide(rideToAssign)
 						rideToAssign.DriverID = drivers[i].ID
+						updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 						driverQueue.InsertRide(rideToAssign)
 						changesThisRound++
 					} else {
@@ -76,6 +78,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 					}
 				} else { // The ride has not already been assigned
 					rideToAssign.DriverID = drivers[i].ID
+					updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 					driverQueue.InsertRide(rideToAssign)
 					assigned = append(assigned, rideToAssign.ID)
 					changesThisRound++
@@ -96,6 +99,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 					if newTripTime < oldTripTime {
 						oldDriverQueue.RemoveRide(rideToAssign)
 						rideToAssign.DriverID = drivers[i].ID
+						updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 						driverQueue.InsertRide(rideToAssign)
 						changesThisRound++
 					} else {
@@ -104,6 +108,7 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 					}
 				} else {
 					rideToAssign.DriverID = drivers[i].ID
+					updateRideDriverInDB(app, rides_col, rideToAssign.ID, drivers[i].ID)
 					driverQueue.InsertRide(rideToAssign)
 					assigned = append(assigned, rideToAssign.ID)
 					changesThisRound++
@@ -224,4 +229,12 @@ func deleteDriverEdge(index int, driver Driver) []Edge {
 func deleteRideEdge(index int, ride Ride) []Edge {
 	ride.Edges[index] = ride.Edges[len(ride.Edges)-1]
 	return ride.Edges[:len(ride.Edges)-1]
+}
+
+func updateRideDriverInDB(app *pocketbase.PocketBase, rides_col *models.Collection, ride_id string, driver_id string) {
+	ride, _ := app.Dao().FindFirstRecordByData(rides_col, "id", ride_id)
+	if ride != nil {
+		ride.SetDataValue("driver_id", driver_id)
+		app.Dao().SaveRecord(ride)
+	}
 }
