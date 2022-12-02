@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
@@ -29,7 +30,7 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*
 			drivers_col, _ := app.Dao().FindCollectionByNameOrId("drivers")
 			driver, _ := app.Dao().FindFirstRecordByData(drivers_col, "id", body.DriverID)
 
-			if driver != nil {
+			if driver != nil && driver.GetBoolDataValue("active") {
 				driver.SetDataValue("current_latitude", body.CurrentLat)
 				driver.SetDataValue("current_longitude", body.CurrentLong)
 				driver.SetDataValue("has_rider", false)
@@ -63,10 +64,12 @@ func getRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*
 						return c.NoContent(201)
 					}
 				} else {
+					fmt.Println("Here2")
 					return c.NoContent(400)
 				}
 			}
 
+			fmt.Println("Here1")
 			return c.NoContent(400)
 		},
 		Middlewares: []echo.MiddlewareFunc{

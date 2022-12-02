@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"fmt"
+
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 	. "github.com/Team-14-Chariot/chariot-backend/tools"
 
@@ -140,6 +142,8 @@ func UpdateDriverQueues(app *pocketbase.PocketBase, eventID string, queues map[s
 			}
 			timesRun++
 		}
+	} else {
+		fmt.Println("Here4")
 	}
 }
 
