@@ -29,8 +29,12 @@ func getBallparkETA(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			drivers := helpers.GetEventDrivers(app, driver_col, body.EventID)
 			rides := helpers.GetNeededRides(app, rides_col, body.EventID)
 
-			eta := len(rides) * 1200 / len(drivers)
-			return c.JSON(200, map[string]interface{}{"eta": eta})
+			if len(drivers) > 0 {
+				eta := len(rides) * 1200 / len(drivers)
+				return c.JSON(200, map[string]interface{}{"eta": eta})
+			}
+
+			return c.JSON(200, map[string]interface{}{"eta": 100000})
 		},
 		Middlewares: []echo.MiddlewareFunc{
 			apis.RequireGuestOnly(),
