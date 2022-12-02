@@ -27,7 +27,7 @@ func getEta(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*D
 			rides, _ := app.Dao().FindCollectionByNameOrId("rides")
 			ride, _ := app.Dao().FindFirstRecordByData(rides, "id", body.RideID)
 
-			if ride != nil {
+			if ride != nil && (ride.GetBoolDataValue("needs_ride") || ride.GetBoolDataValue("in_ride")) {
 				if ride.GetBoolDataValue("in_ride") {
 					return c.JSON(200, map[string]interface{}{"eta": ride.GetDataValue("eta")})
 				}
