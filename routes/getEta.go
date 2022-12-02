@@ -25,7 +25,10 @@ func getEta(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			ride, _ := app.Dao().FindFirstRecordByData(rides, "id", body.RideID)
 
 			if ride != nil {
-				return c.JSON(200, map[string]interface{}{"eta": ride.GetDataValue("eta")})
+				if !ride.GetBoolDataValue("in_ride") {
+					return c.JSON(200, map[string]interface{}{"eta": ride.GetDataValue("eta")})
+				}
+
 			}
 
 			return c.NoContent(400)

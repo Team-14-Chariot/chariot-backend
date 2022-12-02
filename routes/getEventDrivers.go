@@ -30,6 +30,7 @@ type driverResp struct {
 	CurrentLong    string `json:"current_longitude"`
 	InRide         bool   `json:"in_ride"`
 	HasRider       bool   `json:"has_rider"`
+	RidesCompleted int    `json:"rides_completed"`
 }
 
 func getEventDrivers(e *core.ServeEvent, app *pocketbase.PocketBase) error {
@@ -61,6 +62,7 @@ func getEventDrivers(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 						CurrentLong:    driver.GetStringDataValue("current_longitude"),
 						InRide:         driver.GetBoolDataValue("in_ride"),
 						HasRider:       driver.GetBoolDataValue("has_rider"),
+						RidesCompleted: driver.GetIntDataValue("ride_count"),
 					})
 				}
 

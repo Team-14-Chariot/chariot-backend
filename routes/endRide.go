@@ -28,6 +28,9 @@ func endRide(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			driver, _ := app.Dao().FindFirstRecordByData(drivers, "id", ride.GetStringDataValue("driver_id"))
 			driver.SetDataValue("has_rider", false)
 			driver.SetDataValue("in_ride", false)
+			numRides := driver.GetIntDataValue("ride_count")
+			numRides++
+			driver.SetDataValue("ride_count", numRides)
 
 			app.Dao().SaveRecord(ride)
 			app.Dao().SaveRecord(driver)
