@@ -22,6 +22,18 @@ func GetNeededRides(app *pocketbase.PocketBase, rides_col *models.Collection, ev
 	return rides
 }
 
+func GetDriversCurrentRide(app *pocketbase.PocketBase, rides_col *models.Collection, driver_id string) models.Record {
+	rides := GetAllRecords(app, rides_col)
+
+	for _, ride := range rides {
+		if ride.GetBoolDataValue("in_ride") && ride.GetStringDataValue("driver_id") == driver_id {
+			return ride
+		}
+	}
+
+	return models.Record{}
+}
+
 func ConvertToRideObject(rides []models.Record) []*Ride {
 	var ridesObjects []*Ride
 

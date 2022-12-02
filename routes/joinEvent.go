@@ -3,6 +3,9 @@ package routes
 import (
 	"net/http"
 
+	"github.com/Team-14-Chariot/chariot-backend/helpers"
+	. "github.com/Team-14-Chariot/chariot-backend/models"
+
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -18,7 +21,7 @@ type joinEventBody struct {
 	CarPlate       string `json:"car_license_plate"`
 }
 
-func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/joinEvent",
@@ -40,8 +43,11 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 				newDriver.SetDataValue("event_id", body.EventCode)
 				newDriver.SetDataValue("active", true)
 				newDriver.SetDataValue("in_ride", false)
+				newDriver.SetDataValue("has_rider", false)
 
 				app.Dao().SaveRecord(newDriver)
+
+				helpers.UpdateDriverQueues(app, body.EventCode, queues)
 
 				return c.JSON(200, map[string]interface{}{"driver_id": newDriver.Id})
 			}

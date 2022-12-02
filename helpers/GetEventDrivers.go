@@ -28,25 +28,28 @@ func ConvertToDriverObject(app *pocketbase.PocketBase, drivers []models.Record) 
 	for _, driver := range drivers {
 		if driver.GetBoolDataValue("in_ride") {
 			rides_col, _ := app.Dao().FindCollectionByNameOrId("rides")
-			rides := GetNeededRides(app, rides_col, driver.GetStringDataValue("event_id"))
+			ride := GetDriversCurrentRide(app, rides_col, driver.Id)
 
-			for _, ride := range rides {
-				if ride.GetDataValue("driver_id") == driver.Id {
-					driverObjects = append(driverObjects, &Driver{
-						ID:          driver.Id,
-						Capacity:    driver.GetIntDataValue("car_capacity"),
-						CurrentLat:  ride.GetStringDataValue("dest_latitude"),
-						CurrentLong: ride.GetStringDataValue("dest_longitude"),
-					})
-					break
-				}
+			etaToLocation := ride.GetFloatDataValue("eta")
+
+			if !driver.GetBoolDataValue("has_rider") {
+				etaToLocation += ride.GetFloatDataValue("ride_length")
 			}
+
+			driverObjects = append(driverObjects, &Driver{
+				ID:            driver.Id,
+				Capacity:      driver.GetIntDataValue("car_capacity"),
+				CurrentLat:    ride.GetStringDataValue("dest_latitude"),
+				CurrentLong:   ride.GetStringDataValue("dest_longitude"),
+				EtaToLocation: etaToLocation,
+			})
 		} else {
 			driverObjects = append(driverObjects, &Driver{
-				ID:          driver.Id,
-				Capacity:    driver.GetIntDataValue("car_capacity"),
-				CurrentLat:  driver.GetStringDataValue("current_latitude"),
-				CurrentLong: driver.GetStringDataValue("current_longitude"),
+				ID:            driver.Id,
+				Capacity:      driver.GetIntDataValue("car_capacity"),
+				CurrentLat:    driver.GetStringDataValue("current_latitude"),
+				CurrentLong:   driver.GetStringDataValue("current_longitude"),
+				EtaToLocation: 0,
 			})
 		}
 	}

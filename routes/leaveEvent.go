@@ -3,6 +3,9 @@ package routes
 import (
 	"net/http"
 
+	"github.com/Team-14-Chariot/chariot-backend/helpers"
+	. "github.com/Team-14-Chariot/chariot-backend/models"
+
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -13,7 +16,7 @@ type leaveEventBody struct {
 	DriverID string `json:"driver_id"`
 }
 
-func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
+func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/leaveEvent",
@@ -28,7 +31,7 @@ func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase) error {
 			if driver != nil {
 				driver.SetDataValue("active", false)
 
-				// Update Ride queue later here
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues)
 
 				app.Dao().SaveRecord(driver)
 

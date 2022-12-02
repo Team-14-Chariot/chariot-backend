@@ -12,19 +12,19 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return joinEvent(e, app)
+		return joinEvent(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return leaveEvent(e, app)
+		return leaveEvent(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return pauseDriver(e, app)
+		return pauseDriver(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return resumeDriver(e, app)
+		return resumeDriver(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -40,7 +40,7 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return getRide(e, app)
+		return getRide(e, app, queues)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {

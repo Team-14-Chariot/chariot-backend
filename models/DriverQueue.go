@@ -63,13 +63,13 @@ func (queue *DriverQueue) UpdateLastRide(ride *Ride) {
 	queue.prev.RideInfo = ride
 }
 
-func (queue *DriverQueue) PopRide() Ride {
+func (queue *DriverQueue) PopRide() *Ride {
 	if queue.RideInfo != nil {
 		toReturn := queue.RideInfo
 
 		if queue.next == queue {
 			queue.RideInfo = nil
-			return *toReturn
+			return toReturn
 		}
 
 		place := queue
@@ -77,9 +77,9 @@ func (queue *DriverQueue) PopRide() Ride {
 		*queue = *queue.next
 		queue.next = place.next
 		queue.prev = place.prev
-		return *toReturn
+		return toReturn
 	}
-	return Ride{}
+	return nil
 }
 
 func (queue *DriverQueue) RemoveRide(ride *Ride) {

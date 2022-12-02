@@ -200,11 +200,11 @@ func calculateTotalTripLength(queue *DriverQueue, driver Driver, endingID string
 func findDriverToFirstRideEdgeWeight(rideID string, driver Driver) float64 {
 	for _, edge := range driver.Edges {
 		if edge.ID == rideID {
-			return edge.Weight
+			return edge.Weight + driver.EtaToLocation
 		}
 	}
 
-	return 0.0
+	return driver.EtaToLocation
 }
 
 func findRidetoRideEdgeWeight(ID string, ride Ride) float64 {
