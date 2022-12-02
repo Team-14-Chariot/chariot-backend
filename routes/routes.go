@@ -100,6 +100,10 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		return cancelRide(e, app, queues)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return test(e, app, queues)
 	})
 }
