@@ -2,7 +2,9 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
+	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
 
 	"github.com/labstack/echo/v5"
@@ -15,7 +17,7 @@ type resumeDriveBody struct {
 	DriverID string `json:"driver_id"`
 }
 
-func resumeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func resumeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/resumeDriver",
@@ -31,6 +33,10 @@ func resumeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[str
 				driver.SetDataValue("active", true)
 
 				app.Dao().SaveRecord(driver)
+
+				mutex.Lock()
+				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil, nil)
+				mutex.Unlock()
 
 				return c.NoContent(200)
 			}

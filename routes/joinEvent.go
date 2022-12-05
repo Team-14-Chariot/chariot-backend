@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -22,7 +23,7 @@ type joinEventBody struct {
 	DriverPassword string `json:"driver_password"`
 }
 
-func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/joinEvent",
@@ -54,7 +55,9 @@ func joinEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string
 
 				app.Dao().SaveRecord(newDriver)
 
+				mutex.Lock()
 				helpers.UpdateDriverQueues(app, body.EventCode, queues, nil, nil)
+				mutex.Unlock()
 
 				return c.JSON(200, map[string]interface{}{"driver_id": newDriver.Id})
 			}

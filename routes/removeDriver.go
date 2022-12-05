@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -16,7 +17,7 @@ type removeDriverBody struct {
 	DriverID string `json:"driver_id"`
 }
 
-func removeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func removeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/removeDriver",
@@ -33,7 +34,9 @@ func removeDriver(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[str
 					eventId := driver.GetStringDataValue("event_id")
 					app.Dao().DeleteRecord(driver)
 
+					mutex.Lock()
 					helpers.UpdateDriverQueues(app, eventId, queues, nil, nil)
+					mutex.Unlock()
 
 					return c.NoContent(200)
 				}

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -16,7 +17,7 @@ type leaveEventBody struct {
 	DriverID string `json:"driver_id"`
 }
 
-func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/leaveEvent",
@@ -31,7 +32,9 @@ func leaveEvent(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[strin
 			if driver != nil {
 				driver.SetDataValue("active", false)
 
+				mutex.Lock()
 				helpers.UpdateDriverQueues(app, driver.GetStringDataValue("event_id"), queues, nil, nil)
+				mutex.Unlock()
 
 				app.Dao().SaveRecord(driver)
 

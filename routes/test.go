@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -16,7 +17,7 @@ type testBody struct {
 	EventID string `json:"event_id"`
 }
 
-func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/test",
@@ -24,7 +25,9 @@ func test(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*Dri
 			var body testBody
 			c.Bind(&body)
 
+			mutex.Lock()
 			helpers.UpdateDriverQueues(app, body.EventID, queues, nil, nil)
+			mutex.Unlock()
 
 			return c.NoContent(200)
 		},

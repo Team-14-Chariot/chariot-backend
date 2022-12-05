@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -24,7 +25,7 @@ type requestRideBody struct {
 	GroupSize  int    `json:"group_size"`
 }
 
-func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/requestRide",
@@ -58,7 +59,9 @@ func requestRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[stri
 
 					app.Dao().SaveRecord(newRide)
 
+					mutex.Lock()
 					helpers.UpdateDriverQueues(app, body.EventID, queues, nil, nil)
+					mutex.Unlock()
 
 					return c.JSON(200, map[string]interface{}{"ride_id": newRide.Id})
 				}

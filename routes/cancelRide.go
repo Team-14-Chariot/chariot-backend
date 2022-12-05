@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/Team-14-Chariot/chariot-backend/helpers"
 	. "github.com/Team-14-Chariot/chariot-backend/models"
@@ -16,7 +17,7 @@ type cancelRideBody struct {
 	RideID string `json:"ride_id"`
 }
 
-func cancelRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue) error {
+func cancelRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[string]*DriverQueue, mutex *sync.RWMutex) error {
 	e.Router.AddRoute(echo.Route{
 		Method: http.MethodPost,
 		Path:   "/api/cancelRide",
@@ -32,7 +33,9 @@ func cancelRide(e *core.ServeEvent, app *pocketbase.PocketBase, queues map[strin
 					eventCode := ride.GetStringDataValue("event_id")
 					app.Dao().DeleteRecord(ride)
 
+					mutex.Lock()
 					helpers.UpdateDriverQueues(app, eventCode, queues, nil, nil)
+					mutex.Unlock()
 
 					return c.NoContent(200)
 				}

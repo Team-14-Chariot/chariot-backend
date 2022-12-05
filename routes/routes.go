@@ -9,24 +9,26 @@ import (
 )
 
 func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
+	mutex := &sync.RWMutex{}
+
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return requestRide(e, app, queues)
+		return requestRide(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return joinEvent(e, app, queues)
+		return joinEvent(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return leaveEvent(e, app, queues)
+		return leaveEvent(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return pauseDriver(e, app, queues)
+		return pauseDriver(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return resumeDriver(e, app, queues)
+		return resumeDriver(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -48,8 +50,6 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return endRide(e, app)
 	})
-
-	mutex := &sync.RWMutex{}
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		return getEta(e, app, queues, mutex)
@@ -84,7 +84,7 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return removeDriver(e, app, queues)
+		return removeDriver(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -104,7 +104,7 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return cancelRide(e, app, queues)
+		return cancelRide(e, app, queues, mutex)
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -116,6 +116,6 @@ func Routes(app *pocketbase.PocketBase, queues map[string]*DriverQueue) {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		return test(e, app, queues)
+		return test(e, app, queues, mutex)
 	})
 }
